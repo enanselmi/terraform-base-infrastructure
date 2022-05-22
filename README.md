@@ -1,6 +1,6 @@
 # Base Infrastructure for AWS
 
-    The above code is meant to use in us-east-1 region
+    The above code is meant to use in the us-east-1 region.
 
 
 
