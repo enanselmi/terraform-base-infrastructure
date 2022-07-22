@@ -2,7 +2,4 @@
 
     The above code is meant to use in the us-east-1 region.
 
-
-
-
-![image](./images/diagram.png)
+![image](./images/diagram.jpg)
