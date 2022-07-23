@@ -1,15 +1,15 @@
 provider "aws" {
   region = var.region
   default_tags {
-    tags = {
-      owner          = "eanselmi@edrans.com"
-      Name           = "Test For CNB"
-      environment    = "tst"
-      costCenter     = "SYSENG"
-      tagVersion     = 1
-      role           = "tst"
-      project        = "CNB"
-      expirationDate = "12/12/2022"
+    tags = var.tags
+  }
+}
+terraform {
+  required_version = "1.1.9"
+  required_providers {
+    aws = {
+      version = "~> 4"
+      source  = "hashicorp/aws"
     }
   }
 }

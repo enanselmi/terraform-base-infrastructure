@@ -1,3 +1,3 @@
 locals {
-  naming_prefix = "tf-eanselmi-${var.region}"
-} 
+  naming_prefix = "tf-${var.tags.project}"
+}

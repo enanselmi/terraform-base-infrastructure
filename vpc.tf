@@ -1,11 +1,11 @@
 resource "aws_vpc" "cnb_vpc" {
-  cidr_block           = var.vpc_cidr
-  enable_dns_support   = "true"
-  enable_dns_hostnames = "true"
-  enable_classiclink   = "false"
-  instance_tenancy     = "default"
+  cidr_block           = var.vpc.cidr
+  enable_dns_support   = var.vpc.dns_support
+  enable_dns_hostnames = var.vpc.dns_hostnames
+  enable_classiclink   = var.vpc.classiclink
+  instance_tenancy     = var.vpc.tenancy
   tags = {
-    Name = "CNB VPC test"
+    Name = "${local.naming_prefix}-vpc-${var.region}"
   }
 }
 
@@ -16,7 +16,7 @@ resource "aws_subnet" "cnb_public_subnets" {
   map_public_ip_on_launch = "true"
   availability_zone       = var.azs[count.index]
   tags = {
-    Name = "Public-Subnet-${count.index}-${var.azs[count.index]}"
+    Name = "${local.naming_prefix}-public-subnet-${count.index}-${var.azs[count.index]}-${var.region}"
   }
 }
 
@@ -27,14 +27,14 @@ resource "aws_subnet" "cnb_private_subnets" {
   map_public_ip_on_launch = "false"
   availability_zone       = var.azs[count.index]
   tags = {
-    Name = "Private-Subnet-${count.index}-${var.azs[count.index]}"
+    Name = "${local.naming_prefix}-private-subnet-${count.index}-${var.azs[count.index]}-${var.region}"
   }
 }
 
 resource "aws_internet_gateway" "cnb_igw" {
   vpc_id = aws_vpc.cnb_vpc.id
   tags = {
-    Name = "CNB IGW"
+    Name = "${local.naming_prefix}-igw-${var.region}"
   }
 }
 
@@ -43,7 +43,7 @@ resource "aws_eip" "eips" {
   vpc        = true
   depends_on = [aws_internet_gateway.cnb_igw]
   tags = {
-    Name = "CNB-eip-${count.index}"
+    Name = "${local.naming_prefix}-eip-${count.index}-${var.region}"
   }
 }
 
@@ -53,7 +53,7 @@ resource "aws_nat_gateway" "nat_gateways" {
   subnet_id     = aws_subnet.cnb_public_subnets[count.index].id
   depends_on    = [aws_internet_gateway.cnb_igw, aws_eip.eips]
   tags = {
-    Name = "CNB-NGW-${count.index}"
+    Name = "${local.naming_prefix}-ngw-${count.index}-${var.region}"
   }
 }
 
@@ -65,7 +65,7 @@ resource "aws_route_table" "cnb_public_crt" {
     gateway_id = aws_internet_gateway.cnb_igw.id
   }
   tags = {
-    Name = "CNB-Public-CRT"
+    Name = "${local.naming_prefix}-public-crt-${var.region}"
   }
 }
 
@@ -79,11 +79,11 @@ resource "aws_route_table" "cnb_private_crts" {
   count  = length(var.private_subnets)
   vpc_id = aws_vpc.cnb_vpc.id
   route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_nat_gateway.nat_gateways[count.index].id
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat_gateways[count.index].id
   }
   tags = {
-    Name = "CNB-Private-CRT-${var.azs[count.index]}"
+    Name = "${local.naming_prefix}-private-crt-${var.azs[count.index]}-${var.region}"
   }
 }
 

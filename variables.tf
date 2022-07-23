@@ -1,18 +1,3 @@
-variable "server_port" {
-  description = "The port the server will use for HTTP requests"
-  type        = number
-}
-
-variable "ssh_port" {
-  description = "The port the server will use for HTTP requests"
-  type        = number
-}
-
-variable "vpc_cidr" {
-  description = "CIDR for VPC"
-  type        = string
-}
-
 variable "public_subnets" {
   description = "CIDR list for public subnets"
   type        = list(string)
@@ -31,4 +16,14 @@ variable "azs" {
 variable "region" {
   description = "Region to deploy resources"
   type        = string
+}
+
+variable "tags" {
+  description = "Default tags"
+  type        = map(string)
+}
+
+variable "vpc" {
+  description = "VPC variables"
+  type        = map(string)
 }
