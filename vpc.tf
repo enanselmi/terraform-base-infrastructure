@@ -39,7 +39,7 @@ resource "aws_internet_gateway" "cnb_igw" {
 }
 
 resource "aws_eip" "eips" {
-  count      = length(var.public_subnets)
+  count      = var.natgw_enable ? length(var.public_subnets) : 0
   vpc        = true
   depends_on = [aws_internet_gateway.cnb_igw]
   tags = {
@@ -48,7 +48,7 @@ resource "aws_eip" "eips" {
 }
 
 resource "aws_nat_gateway" "nat_gateways" {
-  count         = length(var.public_subnets)
+  count         = var.natgw_enable ? length(var.public_subnets) : 0
   allocation_id = aws_eip.eips[count.index].id
   subnet_id     = aws_subnet.cnb_public_subnets[count.index].id
   depends_on    = [aws_internet_gateway.cnb_igw, aws_eip.eips]
@@ -78,13 +78,16 @@ resource "aws_route_table_association" "cnb_crta_public_subnets" {
 resource "aws_route_table" "cnb_private_crts" {
   count  = length(var.private_subnets)
   vpc_id = aws_vpc.cnb_vpc.id
-  route {
-    cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.nat_gateways[count.index].id
-  }
   tags = {
     Name = "${local.naming_prefix}-private-crt-${var.azs[count.index]}-${var.region}"
   }
+}
+
+resource "aws_route" "cnb_private_internet_route" {
+  count                  = var.natgw_enable ? length(var.public_subnets) : 0
+  route_table_id         = aws_route_table.cnb_private_crts[count.index].id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = aws_nat_gateway.nat_gateways[count.index].id
 }
 
 resource "aws_route_table_association" "cnb_crta_private_subnets" {

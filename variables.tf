@@ -27,3 +27,9 @@ variable "vpc" {
   description = "VPC variables"
   type        = map(string)
 }
+
+variable "natgw_enable" {
+  description = "Enable/Disable natgw"
+  type        = bool
+  default     = false
+}
